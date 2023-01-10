@@ -1,6 +1,7 @@
 pub mod accounts;
 pub mod currencies;
 pub mod data;
+pub mod transactions;
 
 use std::time::Duration;
 
