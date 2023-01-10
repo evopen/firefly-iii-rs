@@ -25,12 +25,11 @@ pub struct Transaction {
 #[derive(Debug, Clone, Serialize, Deserialize, Builder, Default)]
 #[builder(setter(into, strip_option), default)]
 pub struct StoreTransactionParams {
-    error_if_duplicate_hash: bool,
-    apply_rules: bool,
-    #[builder(default)]
-    fire_webhooks: bool,
-    group_title: Option<String>,
-    transactions: Vec<Transaction>,
+    pub error_if_duplicate_hash: bool,
+    pub apply_rules: bool,
+    pub fire_webhooks: bool,
+    pub group_title: Option<String>,
+    pub transactions: Vec<Transaction>,
 }
 
 #[async_trait]
