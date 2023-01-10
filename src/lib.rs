@@ -1,9 +1,9 @@
-mod accounts;
-mod currencies;
+pub mod accounts;
+pub mod currencies;
+pub mod data;
 
 use std::time::Duration;
 
-pub use accounts::Accounts;
 use reqwest::{Method, Url};
 
 pub struct Client {
@@ -57,13 +57,19 @@ impl Client {
         let text = res.text().await.unwrap();
 
         match code.is_success() {
-            true => match serde_json::from_str(&text) {
-                Ok(v) => v,
-                Err(e) => {
-                    println!("code: {}", code);
-                    panic!("{} - {}", e, text);
+            true => {
+                if text.is_empty() {
+                    serde_json::Value::Null
+                } else {
+                    match serde_json::from_str(&text) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            println!("code: {}", code);
+                            panic!("{} -: {}", e, text);
+                        }
+                    }
                 }
-            },
+            }
             false => {
                 panic!("{}", text);
             }

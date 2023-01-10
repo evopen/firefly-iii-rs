@@ -69,8 +69,8 @@ impl Accounts for Client {
 
 #[cfg(test)]
 mod test {
-    use crate::accounts::{CreateAccountParamsBuilder, Role, Type};
-    use crate::{Accounts, Client};
+    use crate::accounts::{Accounts, CreateAccountParamsBuilder, Role, Type};
+    use crate::Client;
 
     #[tokio::test]
     async fn test_list_accounts() {
