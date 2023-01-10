@@ -15,7 +15,7 @@ pub struct Client {
 impl Client {
     pub fn new<S>(site: S, token: S) -> Self
     where
-        S: ToString + AsRef<str>,
+        S: AsRef<str>,
     {
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert(
@@ -40,7 +40,7 @@ impl Client {
             .unwrap();
         Self {
             client,
-            token: token.to_string(),
+            token: token.as_ref().to_string(),
             site: Url::parse(site.as_ref()).unwrap(),
         }
     }

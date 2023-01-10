@@ -1,11 +1,11 @@
 use reqwest::Method;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::Client;
 use async_trait::async_trait;
 use derive_builder::Builder;
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Default, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Type {
     #[default]
@@ -16,7 +16,29 @@ pub enum Type {
     Liability,
 }
 
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LiabilityType {
+    Debt,
+    Loan,
+    Mortgage,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum CreditCardType {
+    #[default]
+    MonthlyFull,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum LiabilityDirection {
+    Credit,
+    Debit,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub enum Role {
     #[default]
     #[serde(rename = "defaultAsset")]
@@ -31,13 +53,17 @@ pub enum Role {
     CashWallet,
 }
 
-#[derive(Debug, Clone, Serialize, Builder, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Builder, Default)]
 #[builder(setter(into, strip_option), default)]
 pub struct CreateAccountParams {
     pub name: String,
     pub r#type: Type,
     #[serde(rename = "account_role")]
     pub role: Option<Role>,
+    pub liability_type: Option<LiabilityType>,
+    pub credit_card_type: Option<CreditCardType>,
+    pub monthly_payment_date: Option<String>,
+    pub liability_direction: Option<LiabilityDirection>,
 }
 
 #[async_trait]
@@ -69,7 +95,7 @@ impl Accounts for Client {
 
 #[cfg(test)]
 mod test {
-    use crate::accounts::{Accounts, CreateAccountParamsBuilder, Role, Type};
+    use crate::accounts::{Accounts, CreateAccountParams, CreateAccountParamsBuilder, Role, Type};
     use crate::Client;
 
     #[tokio::test]
@@ -93,5 +119,11 @@ mod test {
             )
             .await;
         dbg!(&accounts);
+    }
+
+    #[test]
+    fn hello() {
+        let p = serde_json::to_string(&CreateAccountParams::default());
+        dbg!(&p);
     }
 }
