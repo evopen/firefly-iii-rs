@@ -14,6 +14,8 @@ pub enum Type {
     Revenue,
     Cash,
     Liability,
+    #[serde(rename = "initial-balance")]
+    InitialBalance,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -66,25 +68,62 @@ pub struct CreateAccountParams {
     pub liability_direction: Option<LiabilityDirection>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Builder, Default)]
+#[builder(setter(into, strip_option), default)]
+pub struct UpdateAccountParams {
+    pub name: String,
+    #[serde(rename = "account_role")]
+    pub role: Option<Role>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub liability_type: Option<LiabilityType>,
+    pub credit_card_type: Option<CreditCardType>,
+    pub monthly_payment_date: Option<String>,
+    pub opening_balance: Option<String>,
+    pub opening_balance_date: Option<String>,
+}
+
 #[async_trait]
 pub trait Accounts {
-    async fn list_accounts(&self) -> serde_json::Value;
+    async fn list_accounts(&self) -> Vec<serde_json::Value>;
     async fn create_account(&self, params: CreateAccountParams) -> serde_json::Value;
+    async fn update_account(&self, id: u32, params: UpdateAccountParams) -> serde_json::Value;
 }
 
 #[async_trait]
 impl Accounts for Client {
-    async fn list_accounts(&self) -> serde_json::Value {
+    async fn list_accounts(&self) -> Vec<serde_json::Value> {
         let req = self
             .request_builder(Method::GET, "/api/v1/accounts")
+            .build()
+            .unwrap();
+        let res = self.send(req).await;
+
+        let mut accounts = res["data"].as_array().unwrap().to_owned();
+
+        let total_pages = res["meta"]["pagination"]["total"].as_u64().unwrap();
+        for i in 1..=total_pages {
+            let req = self
+                .request_builder(Method::GET, format!("/api/v1/accounts?page={}", i))
+                .build()
+                .unwrap();
+            let res = self.send(req).await;
+            accounts.extend_from_slice(res["data"].as_array().unwrap());
+        }
+        accounts
+    }
+    async fn create_account(&self, params: CreateAccountParams) -> serde_json::Value {
+        let req = self
+            .request_builder(Method::POST, "/api/v1/accounts")
+            .json(&params)
             .build()
             .unwrap();
 
         self.send(req).await
     }
-    async fn create_account(&self, params: CreateAccountParams) -> serde_json::Value {
+
+    async fn update_account(&self, id: u32, params: UpdateAccountParams) -> serde_json::Value {
         let req = self
-            .request_builder(Method::POST, "/api/v1/accounts")
+            .request_builder(Method::PUT, format!("/api/v1/accounts/{}", id))
             .json(&params)
             .build()
             .unwrap();

@@ -30,6 +30,7 @@ impl Client {
 
         let client = reqwest::Client::builder()
             .timeout(Duration::from_secs(10))
+            .tcp_keepalive(Some(Duration::from_secs(30)))
             .gzip(true)
             .deflate(true)
             .brotli(true)
