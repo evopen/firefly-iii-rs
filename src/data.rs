@@ -13,6 +13,7 @@ pub enum Type {
     RevenueAccounts,
     Deposits,
     Transfers,
+    Transactions,
 }
 
 #[async_trait]

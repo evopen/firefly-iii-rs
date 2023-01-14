@@ -18,8 +18,13 @@ pub enum Type {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Transaction {
-    r#type: Type,
-    date: chrono::DateTime<chrono::offset::FixedOffset>,
+    pub r#type: Type,
+    pub date: chrono::DateTime<chrono::offset::FixedOffset>,
+    pub source_name: String,
+    pub destination_name: String,
+    pub amount: String,
+    pub description: String,
+    pub external_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Builder, Default)]
